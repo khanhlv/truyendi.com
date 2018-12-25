@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level][%thread]:%logger{50} [%method:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DEFAULT_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/ttryen-crawler.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover. Make sure the path matches the one in the file element or else
+            the rollover logs are placed in the working directory. -->
+            <fileNamePattern>logs/ttryen-crawler_%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level][%thread]:%logger{50} [%method:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/ttryen-crawler_error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover. Make sure the path matches the one in the file element or else
+            the rollover logs are placed in the working directory. -->
+            <fileNamePattern>logs/ttryen-crawler_error_%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level][%thread]:%logger{50} [%method:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <logger name="com.ttruyen" level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="DEFAULT_LOG" />
+    </logger>
+
+    <logger name="com.zaxxer.hikari" level="ERROR" >
+        <appender-ref ref="ERROR_LOG" />
+    </logger>
+
+    <root level="ERROR">
+        <appender-ref ref="ERROR_LOG" />
+    </root>
+
+</configuration>
