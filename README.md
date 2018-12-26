@@ -1,2 +1,7 @@
-# truyendi.com
-Backend crawler at site truyendi.com
+#Backend
+
+Start: TruyenFullExecute.java
+
+#Front-end
+
+[Truyện Đi](http://truyendi.com)
