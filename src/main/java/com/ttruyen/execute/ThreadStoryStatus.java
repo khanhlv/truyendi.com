@@ -41,7 +41,7 @@ public class ThreadStoryStatus implements Runnable {
                         File file = new File(pathFile);
 
                         if(file.exists()) {
-                            logger.info("EXISTS_GET [URL=" + data.getLink() + "]");
+                            System.out.println("EXISTS_GET [URL=" + data.getLink() + "]");
                             continue;
                         }
 
@@ -50,6 +50,7 @@ public class ThreadStoryStatus implements Runnable {
                         long start = System.currentTimeMillis();
                         Detail detail = parseTruyenFull.readDetail(data.getLink());
                         detail.setId(data.getId());
+                        detail.setLink(data.getLink());
 
                         List<Chapter> chapterList = parseTruyenFull.readChapter(data.getLink(), detail.getPageTotal());
 
@@ -59,7 +60,7 @@ public class ThreadStoryStatus implements Runnable {
 
                         storyDAO.updateStoryStatus(detail);
 
-                        chapterDAO.insert(detail.getId(), detail, chapterList);
+                        chapterDAO.insertNotFull(detail.getId(), detail, chapterList);
 
                         FileUtils.writeStringToFile(new File(pathFile), "DONE");
 

@@ -51,6 +51,43 @@ public class ChapterDAO {
         }
     }
 
+    public void insertNotFull(int storyId, Detail detail, List<Chapter> chapterList) throws SQLException {
+
+        String sqlStory = "INSERT INTO CHAPTER(STORY_ID,CHAPTER_INDEX,CHAPTER_NAME," +
+                "SOURCE_LINK,META_URL,META_TITLE,META_DESCRIPTION,META_KEYWORD,META_IMAGE) " +
+                "VALUES(?,?,?,?,?,?,?,?,?)";
+
+        int countChapter = countChapter(storyId);
+        System.out.println("INFO [CHAPTER=" + countChapter + "] [CHAPTER_GET="+chapterList.size() + "]");
+        if (countChapter > 0 && chapterList.size() > 0 && countChapter != chapterList.size()) {
+            try (Connection con = ConnectionPool.getTransactional();
+                 PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+                for (int i = (countChapter - 5); i < chapterList.size(); i++) {
+                    Chapter data = chapterList.get(i);
+                    if (checkExists(storyId, data.getLink())) {
+                        System.out.println("EXISTS_CHAPTER[" + data.getName() + "][" + data.getLink() + "]");
+                    } else {
+                        String[] name = data.getName().split(":");
+                        pStmt.setInt(1, storyId);
+                        pStmt.setString(2, name[0].trim());
+                        pStmt.setString(3, name.length > 1 ? name[1] : "");
+                        pStmt.setString(4, data.getLink());
+                        pStmt.setString(5, StringUtil.stripAccents(name[0].trim(), "-"));
+                        pStmt.setString(6, data.getName());
+                        pStmt.setString(7, data.getName());
+                        pStmt.setString(8, data.getName());
+                        pStmt.setString(9, detail.getImage());
+                        pStmt.executeUpdate();
+
+                        logger.info("INSERT_CHAPTER[" + data.getName() + "][" + data.getLink() + "]");
+                    }
+                }
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+    }
+
     public boolean checkExists(int storyId, String sourceLink) throws SQLException {
         String sqlStory = "SELECT * FROM CHAPTER WHERE STORY_ID = ? AND SOURCE_LINK = ?";
         try (Connection con = ConnectionPool.getTransactional();
@@ -179,5 +216,24 @@ public class ChapterDAO {
         } catch (Exception ex) {
             throw ex;
         }
+    }
+
+    public int countChapter(int storyId) throws SQLException {
+        String sqlStory = "SELECT COUNT(1) FROM CHAPTER WHERE STORY_ID = ?";
+        try (Connection con = ConnectionPool.getTransactional();
+             PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
+
+            pStmt.setInt(1, storyId);
+
+            ResultSet rs = pStmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+        return 0;
     }
 }
