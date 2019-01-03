@@ -53,15 +53,23 @@ public final class GZipUtil {
             return IOUtils.toString(in);
         }
     }
+
+    public static String decompressGZIP(InputStream input) throws IOException {
+
+        try (GzipCompressorInputStream in = new GzipCompressorInputStream(input)){
+            return IOUtils.toString(in);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         InputStream ia = GZipUtil.compress("khánh khánh khánh khánh khánh");
 
         System.out.println("Done");
 
-        OutputStream outStream = new FileOutputStream("/Users/khanhlv/ttruyen/text.txt.gz");
+        OutputStream outStream = new FileOutputStream("D:/text.txt.gz");
 
         IOUtils.copy(ia, outStream);
 
-        System.out.println(GZipUtil.decompressGZIP(new File("/Users/khanhlv/ttruyen/text.txt.gz")));
+        // System.out.println(GZipUtil.decompressGZIP(new File("/Users/khanhlv/ttruyen/text.txt.gz")));
     }
 }

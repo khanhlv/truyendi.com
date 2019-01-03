@@ -1,14 +1,15 @@
 package com.ttruyen.execute;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.services.drive.Drive;
 import com.ttruyen.core.Const;
 import com.ttruyen.db.ChapterDAO;
 import com.ttruyen.db.StoryDAO;
 import com.ttruyen.model.Content;
 import com.ttruyen.parse.ParseTruyenFull;
-import com.ttruyen.utils.DateUtil;
-import com.ttruyen.utils.FTPUtil;
-import com.ttruyen.utils.FileUtil;
-import com.ttruyen.utils.GZipUtil;
+import com.ttruyen.utils.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -104,10 +105,80 @@ public class ThreadChapterContent implements Runnable {
         }
     }
 
+    private void crawlerContentWithChapterGoogle() {
+        try {
+
+            Drive drive = GoogleDriverUtil.driveService();
+
+            while (true) {
+
+                ArrayList<Integer> listId = new ArrayList<>();
+
+                List<Content> contentList = chapterDAO.selectTop(Const.TOP_CHAPTER);
+
+                if (contentList == null || contentList.size() == 0) {
+                    return;
+                }
+
+                if (drive != null) {
+                    Date date =  new Date();
+                    for(Content data : contentList){
+                        try {
+
+                            logger.info("GET_START [URL=" + data.getLink() + "]");
+
+                            long start = System.currentTimeMillis();
+                            Content content = parseTruyenFull.readContent(data.getLink());
+                            content.setId(data.getId());
+
+                            long end = System.currentTimeMillis() - start;
+
+                            logger.info("GET_END [URL=" + data.getLink() + "][TIME=" + end  + "]");
+
+                            if (StringUtils.isBlank(content.getContent())) {
+                                chapterDAO.updateStatus(data.getId(), 2);
+                            } else {
+                                InputStream inputStream = GZipUtil.compress(content.getContent());
+
+                                String fileId = GoogleDriverUtil.uploadFile(drive, inputStream, data.getId() + ".txt.gz", "1-WvE-4xcD81drSN_5bnOFpAj73rX_RHN");
+
+                                int fileSize = inputStream.available();
+                                System.out.println("[SIZE=" + fileSize + "][FILE_ID=" + fileId + "]");
+
+                                content.setFileName(fileId);
+                                content.setContent(fileId);
+
+                                chapterDAO.updateChapterContent(content);
+
+                                if (!listId.contains(data.getId())) {
+                                    date = DateUtils.addSeconds(date, -10);
+                                    listId.add(data.getId());
+                                }
+
+                                storyDAO.updatCREATED_DATE(data.getStoryId(), DateUtil.createDateTimestamp(date));
+
+                                chapterDAO.updateStatus(data.getId(), 1);
+                            }
+
+                        } catch (Exception ex) {
+                            logger.error("ERROR[" + data.getLink() + "]", ex);
+                            chapterDAO.updateStatus(data.getId(), -1);
+                        }
+                    }
+                }
+                System.out.println("CHAPTER_SIZE [" + contentList.size() + "]");
+
+                Thread.sleep(1 * 30 * 1000);
+            }
+        } catch (Exception ex) {
+            logger.error("ERROR[crawlerContentWithChapterGoogle]", ex);
+        }
+    }
+
     @Override
     public void run() {
         logger.info("START THREAD [ThreadChapterContent]");
 
-        crawlerContentWithChapter();
+        crawlerContentWithChapterGoogle();
     }
 }
