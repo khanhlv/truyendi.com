@@ -49,30 +49,30 @@ public class ThreadChapter implements Runnable {
 
                         logger.info(this.threadName + " ## GET_START [URL=" + link + "]");
 
-//                        long start = System.currentTimeMillis();
-//                        Content content = parseTruyenFull.readContent(link);
-//                        content.setId(id);
-//                        long end = System.currentTimeMillis() - start;
-//
-//                        logger.info(this.threadName + " ## GET_END [URL=" + link + "][TIME=" + end  + "]");
-//
-//                        if (StringUtils.isBlank(content.getContent())) {
-//                            chapterDAO.updateStatus(id, 2);
-//                        } else {
-//                            InputStream inputStream = GZipUtil.compress(content.getContent());
-//                            int fileSize = inputStream.available();
-//
-//                            String fileId = GoogleDriverUtil.uploadFile(driveFiles, inputStream, id + ".txt.gz", "1-WvE-4xcD81drSN_5bnOFpAj73rX_RHN");
-//
-//                            System.out.println("[SIZE=" + fileSize + "][FILE_ID=" + fileId + "]");
-//
-//                            content.setFileName(fileId);
-//                            content.setContent(fileId);
-//
-//                            chapterDAO.updateChapterContent(content);
-//
-//                            chapterDAO.updateStatus(id, 1);
-//                        }
+                        long start = System.currentTimeMillis();
+                        Content content = parseTruyenFull.readContent(link);
+                        content.setId(id);
+                        long end = System.currentTimeMillis() - start;
+
+                        logger.info(this.threadName + " ## GET_END [URL=" + link + "][TIME=" + end  + "]");
+
+                        if (StringUtils.isBlank(content.getContent())) {
+                            chapterDAO.updateStatus(id, 2);
+                        } else {
+                            InputStream inputStream = GZipUtil.compress(content.getContent());
+                            int fileSize = inputStream.available();
+
+                            String fileId = GoogleDriverUtil.uploadFile(driveFiles, inputStream, id + ".txt.gz", "1-WvE-4xcD81drSN_5bnOFpAj73rX_RHN");
+
+                            System.out.println(this.threadName + " ## [SIZE=" + fileSize + "][FILE_ID=" + fileId + "]");
+
+                            content.setFileName(fileId);
+                            content.setContent(fileId);
+
+                            chapterDAO.updateChapterContent(content);
+
+                            chapterDAO.updateStatus(id, 1);
+                        }
 
                     } catch (Exception ex) {
                         logger.error(this.threadName + " ## ERROR[" + link + "]", ex);
@@ -83,7 +83,7 @@ public class ThreadChapter implements Runnable {
                 Thread.sleep( 5000);
             }
         } catch (Exception ex) {
-            logger.error("ERROR[ThreadChapter]", ex);
+            logger.error(this.threadName + " ## ERROR[ThreadChapter]", ex);
         }
     }
 }

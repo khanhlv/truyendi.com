@@ -28,6 +28,8 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.ttruyen.model.Content;
+import com.ttruyen.parse.ParseTruyenFull;
 
 public final class GoogleDriverUtil {
     public static final String APPLICATION_NAME = "Google Drive TruyenDi";
@@ -74,14 +76,14 @@ public final class GoogleDriverUtil {
 
     /**
      *
-     * @param drive
+     * @param files
      * @param filePath
      * @param contentType
      * @param folderId
      * @return
      * @throws Exception
      */
-    public static String uploadFile(Drive drive, java.io.File filePath, String contentType, String folderId) throws Exception {
+    public static String uploadFile(Drive.Files files, java.io.File filePath, String contentType, String folderId) throws Exception {
         File fileMetadata = new File();
         fileMetadata.setName(filePath.getName());
 
@@ -91,7 +93,7 @@ public final class GoogleDriverUtil {
 
         FileContent mediaContent = new FileContent(contentType, filePath);
 
-        File file = drive.files().create(fileMetadata, mediaContent)
+        File file = files.create(fileMetadata, mediaContent)
                 .setFields("id")
                 .execute();
         System.out.println("FileID: " + file.getId());
@@ -108,7 +110,7 @@ public final class GoogleDriverUtil {
      * @return
      * @throws Exception
      */
-    public static String uploadFile(Drive drive, byte[] data, String fileName, String folderId) throws Exception {
+    public static String uploadFile(Drive.Files files, byte[] data, String fileName, String folderId) throws Exception {
         File fileMetadata = new File();
         fileMetadata.setName(fileName);
 
@@ -118,26 +120,26 @@ public final class GoogleDriverUtil {
 
         ByteArrayContent byteArrayContent = new ByteArrayContent(null, data);
 
-        File file = drive.files().create(fileMetadata, byteArrayContent)
+        File file = files.create(fileMetadata, byteArrayContent)
                 .setFields("id")
                 .execute();
 
-        System.out.println("FileID: " + file.getId());
+        System.out.println("FILE_ID: " + file.getId());
 
         return file.getId();
     }
 
     /**
      *
-     * @param drive
+     * @param files
      * @param content
      * @param fileName
      * @param folderId
      * @return
      * @throws Exception
      */
-    public static String uploadFile(Drive drive, String content, String fileName, String folderId) throws Exception {
-        return uploadFile(drive, content.getBytes("UTF-8"), fileName, folderId);
+    public static String uploadFile(Drive.Files files, String content, String fileName, String folderId) throws Exception {
+        return uploadFile(files, content.getBytes("UTF-8"), fileName, folderId);
     }
 
     /**
@@ -149,43 +151,43 @@ public final class GoogleDriverUtil {
      * @return
      * @throws Exception
      */
-    public static String uploadFile(Drive drive, InputStream inputStream, String fileName, String folderId) throws Exception {
-        return uploadFile(drive, IOUtils.toByteArray(inputStream), fileName, folderId);
+    public static String uploadFile(Drive.Files files, InputStream inputStream, String fileName, String folderId) throws Exception {
+        return uploadFile(files, IOUtils.toByteArray(inputStream), fileName, folderId);
     }
 
     /**
      *
-     * @param drive
+     * @param files
      * @param fileId
      * @return
      * @throws Exception
      */
-    public static InputStream downloadFileInputStream(Drive drive, String fileId) throws Exception {
-        return drive.files().get(fileId).executeMediaAsInputStream();
+    public static InputStream downloadFileInputStream(Drive.Files files, String fileId) throws Exception {
+        return files.get(fileId).executeMediaAsInputStream();
     }
 
     /**
      *
-     * @param drive
+     * @param files
      * @param fileId
      * @return
      * @throws Exception
      */
-    public static ByteArrayOutputStream downloadFileOutputStream(Drive drive, String fileId) throws Exception {
+    public static ByteArrayOutputStream downloadFileOutputStream(Drive.Files files, String fileId) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        drive.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+        files.get(fileId).executeMediaAndDownloadTo(outputStream);
         return outputStream;
     }
 
     /**
      *
-     * @param drive
+     * @param files
      * @param fileId
      * @return
      * @throws Exception
      */
-    public static String readFileGZip(Drive drive, String fileId) throws Exception {
-        InputStream inputStream = downloadFileInputStream(drive, fileId);
+    public static String readFileGZip(Drive.Files files, String fileId) throws Exception {
+        InputStream inputStream = downloadFileInputStream(files, fileId);
         System.out.println("Bytes: " + inputStream.available());
         if (inputStream.available() > 0) {
             return GZipUtil.decompressGZIP(inputStream);
@@ -196,16 +198,16 @@ public final class GoogleDriverUtil {
 
     /**
      *
-     * @param drive
+     * @param files
      * @param folder
      * @throws Exception
      */
-    public static void createFolder(Drive drive, String folder) throws Exception {
+    public static void createFolder(Drive.Files files, String folder) throws Exception {
         File fileMetadata = new File();
         fileMetadata.setName(folder);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
 
-        File file = drive.files().create(fileMetadata)
+        File file = files.create(fileMetadata)
                 .setFields("id")
                 .execute();
 
@@ -226,23 +228,27 @@ public final class GoogleDriverUtil {
                 .build();
     }
 
+    public static Drive.Files driveFiles() throws Exception {
+        return driveService().files();
+    }
+
     /**
      *
-     * @param drive
+     * @param files
      * @throws Exception
      */
-    public static void listFiles(Drive drive) throws Exception {
-        FileList result = drive.files().list()
+    public static void listFiles(Drive.Files files) throws Exception {
+        FileList result = files.list()
                 .setPageSize(100)
                 .setFields("nextPageToken, files(id, name)")
                 .execute();
-        List<File> files = result.getFiles();
+        List<File> listFile = result.getFiles();
 
-        if (files == null || files.isEmpty()) {
+        if (listFile == null || listFile.isEmpty()) {
             System.out.println("No files found.");
         } else {
             System.out.println("Files:");
-            for (File file : files) {
+            for (File file : listFile) {
                 System.out.printf("%s (%s)\n", file.getName(), file.getId());
             }
         }
@@ -252,19 +258,19 @@ public final class GoogleDriverUtil {
 
         Drive drive = GoogleDriverUtil.driveService();
 
-//        ParseTruyenFull parseTruyenFull = new ParseTruyenFull();
-//
-//        Content content = parseTruyenFull.readContent("https://truyenfull.vn/thuong-thien/chuong-797/");;
+        ParseTruyenFull parseTruyenFull = new ParseTruyenFull();
+        Content content = parseTruyenFull.readContent("https://truyenfull.vn/thuong-thien/chuong-797/");;
 
 //        GoogleDriverUtil.uploadFile(drive,  new java.io.File("D:/text.txt.gz"), "application/gzip", "1-WvE-4xcD81drSN_5bnOFpAj73rX_RHN");
 
-//        InputStream inputStream = GZipUtil.compress(content.getContent());
+        InputStream inputStream = GZipUtil.compress(content.getContent());
 //
-//        GoogleDriverUtil.uploadFile(drive,  inputStream, "khanh.txt.gz","1-WvE-4xcD81drSN_5bnOFpAj73rX_RHN");
+        System.out.println(inputStream.available());
+//        GoogleDriverUtil.uploadFile(drive, inputStream, "khanh.txt.gz","1-WvE-4xcD81drSN_5bnOFpAj73rX_RHN");
 
-        GoogleDriverUtil.listFiles(drive);
+//        GoogleDriverUtil.listFiles(drive);
 
-//        System.out.println(GoogleDriverUtil.readFileGZip(drive, "1NM1NBOvssgEv5Y9NSuu-ilZgW9JAELzE"));
+        System.out.println(GoogleDriverUtil.readFileGZip(drive.files(), "1Ca1IJtQARpUztqcTTIRGlVSTbw7AXdgZ"));
 
     }
 }
