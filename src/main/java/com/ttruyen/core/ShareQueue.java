@@ -23,7 +23,7 @@ public final class ShareQueue {
     public static List<String> getItem() {
         List<String> listItem = new ArrayList<>();
 
-        int size = shareQueue.size() > 5 ? 5 : shareQueue.size();
+        int size = shareQueue.size() > Const.SHARE_QUEUE_SIZE ? Const.SHARE_QUEUE_SIZE : shareQueue.size();
 
         for (int i = 0; i < size; i++) {
             listItem.add(shareQueue.poll());

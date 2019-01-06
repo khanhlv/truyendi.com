@@ -22,7 +22,6 @@ public class ThreadChapter implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ThreadChapter.class);
     private ChapterDAO chapterDAO = new ChapterDAO();
-    private StoryDAO storyDAO = new StoryDAO();
     private ParseTruyenFull parseTruyenFull = new ParseTruyenFull();
     private Drive.Files driveFiles;
     private String threadName = "THREAD_";
@@ -76,7 +75,7 @@ public class ThreadChapter implements Runnable {
 
                     } catch (Exception ex) {
                         logger.error(this.threadName + " ## ERROR[" + link + "]", ex);
-//                        chapterDAO.updateStatus(id, -1);
+                        chapterDAO.updateStatus(id, -1);
                     }
                 }
 
