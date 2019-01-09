@@ -216,6 +216,19 @@ public final class GoogleDriverUtil {
 
     /**
      *
+     * @param files
+     * @param fileId
+     * @throws Exception
+     */
+    public static void deleteFile(Drive.Files files, String fileId) throws Exception {
+
+        files.delete(fileId).execute();
+
+        System.out.println("File ID: " + fileId);
+    }
+
+    /**
+     *
      * @return
      * @throws Exception
      */
@@ -228,6 +241,11 @@ public final class GoogleDriverUtil {
                 .build();
     }
 
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
     public static Drive.Files driveFiles() throws Exception {
         return driveService().files();
     }

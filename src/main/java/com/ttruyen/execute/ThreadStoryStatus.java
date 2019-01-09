@@ -1,18 +1,18 @@
 package com.ttruyen.execute;
 
 import com.ttruyen.core.Const;
-import com.ttruyen.db.AuthorDAO;
-import com.ttruyen.db.CategoryDAO;
 import com.ttruyen.db.ChapterDAO;
 import com.ttruyen.db.StoryDAO;
 import com.ttruyen.model.Chapter;
 import com.ttruyen.model.Detail;
 import com.ttruyen.parse.ParseTruyenFull;
+import com.ttruyen.utils.DateUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 
 public class ThreadStoryStatus implements Runnable {
@@ -61,6 +61,8 @@ public class ThreadStoryStatus implements Runnable {
                         storyDAO.updateStoryStatus(detail);
 
                         chapterDAO.insertNotFull(detail.getId(), detail, chapterList);
+
+                        storyDAO.updatCREATED_DATE(detail.getId(), DateUtil.createDateTimestamp(new Date()));
 
                         FileUtils.writeStringToFile(new File(pathFile), "DONE");
 
