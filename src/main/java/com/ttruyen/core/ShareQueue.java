@@ -29,7 +29,6 @@ public final class ShareQueue {
             listItem.add(shareQueue.poll());
         }
 
-        System.out.println("SHARE_QUEUE=" + shareQueue.size());
         return listItem;
     }
 }

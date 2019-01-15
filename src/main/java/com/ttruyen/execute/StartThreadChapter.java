@@ -4,16 +4,20 @@ import com.google.api.services.drive.Drive;
 import com.ttruyen.utils.GoogleDriverUtil;
 
 public class StartThreadChapter {
-    public static void main(String[] args) throws Exception {
 
+    public void execute(int threadCount) throws Exception {
         Drive.Files driveFiles = GoogleDriverUtil.driveFiles();
 
         new Thread(new ThreadShareQueue()).start();
+        Thread.sleep(5000);
 
-        new Thread(new ThreadChapter(driveFiles, 1)).start();
-        new Thread(new ThreadChapter(driveFiles, 2)).start();
-        new Thread(new ThreadChapter(driveFiles, 3)).start();
-        new Thread(new ThreadChapter(driveFiles, 4)).start();
-        new Thread(new ThreadChapter(driveFiles, 5)).start();
+        for (int i = 1; i <= threadCount; i++) {
+            new Thread(new ThreadChapter(driveFiles, i)).start();
+            Thread.sleep(5000);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        new StartThreadChapter().execute(4);
     }
 }

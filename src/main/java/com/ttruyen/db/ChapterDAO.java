@@ -4,6 +4,7 @@ import com.ttruyen.core.ConnectionPool;
 import com.ttruyen.model.Chapter;
 import com.ttruyen.model.Content;
 import com.ttruyen.model.Detail;
+import com.ttruyen.utils.DateUtil;
 import com.ttruyen.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ChapterDAO {
@@ -82,6 +84,7 @@ public class ChapterDAO {
                         logger.info("INSERT_CHAPTER[" + data.getName() + "][" + data.getLink() + "]");
                     }
                 }
+                new StoryDAO().updatCREATED_DATE(detail.getId(), DateUtil.createDateTimestamp(new Date()));
             } catch (Exception ex) {
                 throw ex;
             }
