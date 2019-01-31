@@ -27,14 +27,14 @@ public class ThreadShareQueue implements Runnable {
                 if (ShareQueue.shareQueue.size() < Const.TOP_CHAPTER) {
                     List<Content> contentList = chapterDAO.selectTop(Const.TOP_CHAPTER);
 
-                    if (contentList == null || contentList.size() == 0) {
-                        return;
+                    if (contentList != null && contentList.size() > 0) {
+                        ShareQueue.addItem(contentList);
                     }
-
-                    ShareQueue.addItem(contentList);
                 }
+
                 System.out.println("SHARE_QUEUE=" + ShareQueue.shareQueue.size());
-                Thread.sleep(30000);
+
+                Thread.sleep(1 * 60 * 1000);
             }
         } catch (Exception ex) {
             logger.error("ERROR[ThreadShareQueue]", ex);

@@ -64,7 +64,7 @@ public class ChapterDAO {
         if (countChapter > 0 && chapterList.size() > 0 && countChapter != chapterList.size()) {
             try (Connection con = ConnectionPool.getTransactional();
                  PreparedStatement pStmt = con.prepareStatement(sqlStory)) {
-                for (int i = (countChapter - 5); i < chapterList.size(); i++) {
+                for (int i = (countChapter < 5 ? countChapter : (countChapter - 5)); i < chapterList.size(); i++) {
                     Chapter data = chapterList.get(i);
                     if (checkExists(storyId, data.getLink())) {
                         System.out.println("EXISTS_CHAPTER[" + data.getName() + "][" + data.getLink() + "]");
@@ -81,7 +81,7 @@ public class ChapterDAO {
                         pStmt.setString(9, detail.getImage());
                         pStmt.executeUpdate();
 
-                        logger.info("INSERT_CHAPTER[" + data.getName() + "][" + data.getLink() + "]");
+                        System.out.println("INSERT_CHAPTER[" + data.getName() + "][" + data.getLink() + "]");
                     }
                 }
                 new StoryDAO().updatCREATED_DATE(detail.getId(), DateUtil.createDateTimestamp(new Date()));
